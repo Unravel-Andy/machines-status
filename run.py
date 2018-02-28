@@ -23,12 +23,12 @@ def main():
     confluence.server_name = 'dingo3'
     if confluence.set_content() == True:
         print('should process and put content')
-        # result = confluence.put_content()
-        #
-        # if result:
-        #     print('Put new info to Confluence Success')
-        # else:
-        #     print('Put new info to Confluence Fail')
+        result = confluence.put_content()
+
+        if result:
+            print('Put new info to Confluence Success')
+        else:
+            print('Put new info to Confluence Fail')
 
     else:
         print('content no change should not process')
