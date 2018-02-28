@@ -1,5 +1,5 @@
 import requests
-import ujson
+import json
 from bs4 import BeautifulSoup
 import re
 import subprocess
@@ -17,13 +17,13 @@ class Confluence(object):
     # Get Main Body Content from Confluence
     def get_content_body(self):
         res = requests.get(self.get_content_body_url,headers = self.headers)
-        json = ujson.loads(res.text)
+        content = json.loads(res.text)
 
-        self.content_title = json['title']
-        self.content_type = json['type']
-        self.content_stat = json['status']
+        self.content_title = content['title']
+        self.content_type = content['type']
+        self.content_stat = content['status']
         hosts = self.get_host()
-        self.body = json['body']['storage']['value']
+        self.body = content['body']['storage']['value']
 
         return {'title' : self.content_title, 'type' : self.content_type, 'stat' : self.content_stat, 'hosts' : hosts}
 
@@ -31,7 +31,7 @@ class Confluence(object):
     def get_content_ver(self):
         al_ver_req = requests.get(self.al_base, headers=self.headers)
 
-        self.content_ver = str(ujson.loads(al_ver_req.text)['version']['number']+1)
+        self.content_ver = str(json.loads(al_ver_req.text)['version']['number']+1)
 
         return(self.content_ver)
 
@@ -62,7 +62,7 @@ class Confluence(object):
                         }
                 }
 
-        data = ujson.loads(ujson.dumps(data))
+        data = json.loads(json.dumps(data))
         self.headers['content-type'] = 'application/json'
         res = requests.put(self.al_base, headers=self.headers , json=data)
         if res.status_code == 200:
@@ -77,7 +77,7 @@ class Confluence(object):
             soup = BeautifulSoup(self.body, "html.parser")
             tag = soup.find(text=self.server_name).find_parent('td').find_next('td').find_next('td').find_next('td').find_next('td')
             print(tag + '\n')
-            
+
             if tag.string != self.unravel_version:
                 tag.string = self.unravel_version
                 should_process = True
