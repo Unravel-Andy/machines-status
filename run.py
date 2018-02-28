@@ -20,16 +20,16 @@ def main():
     print('Editing Content Status: %s' % body['stat'])
     print('Editing Content type: %s\n' % body['type'])
 
-    confluence.server_name = 'tomo2'
+    confluence.server_name = 'congo5'
 
     if confluence.set_content() == True:
         print('should process and put content')
-        result = confluence.put_content()
-
-        if result:
-            print('Put new info to Confluence Success')
-        else:
-            print('Put new info to Confluence Fail')
+        # result = confluence.put_content()
+        #
+        # if result:
+        #     print('Put new info to Confluence Success')
+        # else:
+        #     print('Put new info to Confluence Fail')
 
     else:
         print('content no change should not process')

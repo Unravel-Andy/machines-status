@@ -76,7 +76,8 @@ class Confluence(object):
             should_process = False
             soup = BeautifulSoup(self.body, "html.parser")
             tag = soup.find(text=self.server_name).find_parent('td').find_next('td').find_next('td').find_next('td').find_next('td')
-
+            print(tag + '\n')
+            
             if tag.string != self.unravel_version:
                 tag.string = self.unravel_version
                 should_process = True
