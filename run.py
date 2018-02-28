@@ -20,6 +20,7 @@ def main():
     print('Editing Content Status: %s' % body['stat'])
     print('Editing Content type: %s\n' % body['type'])
 
+    confluence.server_name = 'dingo3'
     if confluence.set_content() == True:
         print('should process and put content')
         # result = confluence.put_content()
