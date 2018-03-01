@@ -38,7 +38,7 @@ class Confluence(object):
     # Get Current Hostname and ip address
     def get_host(self):
             self.server_name = subprocess.check_output(['hostname', '-s'])
-            self.ip_addr = subprocess.check_output(['hostname', '-i'])[:-1]
+            self.ip_addr = subprocess.check_output(['hostname', '-i']).split('\n')[0]
             return(self.server_name, self.ip_addr)
 
     # Save content back to Confluence
@@ -77,13 +77,12 @@ class Confluence(object):
         except Exception as e:
             print('No server name Found')
             print('Now Looking for IP address instead\n')
-
-        try:
-            tag = soup.find(text=self.ip_addr).find_parent('td').find_previous('td')
-            print(str(tag) + '\n')
-        except:
-            print('No IP address Found')
-            exit()
+            try:
+                tag = soup.find(text=self.ip_addr).find_parent('td').find_previous('td')
+                print(str(tag) + '\n')
+            except:
+                print('No IP address Found')
+                exit()
 
         if tag.string != self.unravel_version:
             tag.string = self.unravel_version

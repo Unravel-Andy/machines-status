@@ -3,6 +3,7 @@ from base64 import b64encode as b64e
 import subprocess
 
 def main():
+    auto_update()
     unravel_base_url = 'http://localhost:3000'
     atlassian_base_url = 'https://unraveldata.atlassian.net/wiki/rest/api/content/284262500'
     credentials = b64e('team@unraveldata.com:Unraveldata123!')
