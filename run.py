@@ -36,8 +36,9 @@ def main():
 
 def auto_update():
     print('Updating Script\n')
-    subprocess.check_output(['git','stash'])
-    subprocess.check_output(['git', 'pull'])
+    path = '--git-dir=/usr/bin/machines-status/.git'
+    subprocess.check_output(['git', path, 'stash'])
+    subprocess.check_output(['git', path, 'pull'])
 
 if __name__ == '__main__':
     main()
