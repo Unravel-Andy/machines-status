@@ -20,7 +20,6 @@ def main():
     print('Editing Content Status: %s' % body['stat'])
     print('Editing Content type: %s\n' % body['type'])
 
-    print(confluence.ip_addr)
     if confluence.set_content() == True:
         print('should process and put content')
         result = confluence.put_content()
