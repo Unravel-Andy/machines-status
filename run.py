@@ -1,4 +1,5 @@
-from confluence import Confluence
+#v1.1.2
+rom confluence import Confluence
 from base64 import b64encode as b64e
 import subprocess
 
