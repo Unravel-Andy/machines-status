@@ -38,7 +38,7 @@ class Confluence(object):
     # Get Current Hostname and ip address
     def get_host(self):
             self.server_name = subprocess.check_output(['hostname', '-s'])
-            self.ip_addr = subprocess.check_output(['hostname', '-i'])
+            self.ip_addr = subprocess.check_output(['hostname', '-i'])[:-1]
             return(self.server_name, self.ip_addr)
 
     # Save content back to Confluence
