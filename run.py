@@ -35,6 +35,7 @@ def main():
 
 
 def auto_update():
+    print('Updating Script\n')
     subprocess.check_output(['git','stash'])
     subprocess.check_output(['git', 'pull'])
 
