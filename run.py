@@ -33,8 +33,8 @@ def main():
         print('content no change should not process')
 
 
-
 def auto_update():
+    subprocess.check_output(['git','stash'])
     subprocess.check_output(['git', 'pull'])
 
 if __name__ == '__main__':
