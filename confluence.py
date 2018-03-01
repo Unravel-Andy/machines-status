@@ -39,8 +39,8 @@ class Confluence(object):
     def get_host(self):
         try:
             self.server_name = subprocess.check_output(['hostname', '-s'])
-            # self.ip_addr = subprocess.check_output(['hostname', '-i'])
-            return(self.server_name)
+            self.ip_addr = subprocess.check_output(['hostname', '-i'])
+            return(self.server_name, self.ip_addr)
         except:
             self.server_name = subprocess.check_output(['hostname', '-s'])
             return(self.server_name)
@@ -72,19 +72,27 @@ class Confluence(object):
 
     # Set New Content that will send back to Confluence
     def set_content(self):
+        should_process = False
+        soup = BeautifulSoup(self.body, "html.parser")
+
         try:
-            should_process = False
-            soup = BeautifulSoup(self.body, "html.parser")
             tag = soup.find(text=self.server_name).find_parent('td').find_next('td').find_next('td').find_next('td').find_next('td')
             print(str(tag) + '\n')
-
-
-            if tag.string != self.unravel_version:
-                tag.string = self.unravel_version
-                should_process = True
         except Exception as e:
             print('No server name Found')
+            print('Now Looking for IP address instead\n')
+
+        try:
+            tag = soup.find(text=self.ip_addr).find_parent('td').find_previous('td')
+            print(str(tag) + '\n')
+        except:
+            print('No IP address Found')
             exit()
+
+        if tag.string != self.unravel_version:
+            tag.string = self.unravel_version
+            should_process = True
+
 
         self.new_content = str(soup)
 
