@@ -49,7 +49,7 @@ class Confluence(object):
                 "status" : self.content_stat ,
                 "version" : {
                             "number" : self.content_ver,
-                            "minorEdit":true
+                            "minorEdit":True
                             },
                 "body" : {
                          "storage" : {
