@@ -48,7 +48,8 @@ class Confluence(object):
                 "type" : self.content_type ,
                 "status" : self.content_stat ,
                 "version" : {
-                            "number" : self.content_ver
+                            "number" : self.content_ver,
+                            "minorEdit":true
                             },
                 "body" : {
                          "storage" : {
