@@ -1,4 +1,4 @@
-#v1.1.3
+#v1.1.4
 from confluence import Confluence
 from base64 import b64encode as b64e
 import subprocess
@@ -38,7 +38,7 @@ def main():
 def auto_update():
     print('Updating Script\n')
     path = '--git-dir=/usr/bin/machines-status/.git'
-    result = subprocess.check_output('git ' + path +' stash',shell=True)
+    result = subprocess.check_output('git ' + path +' checkout -- .',shell=True)
     print(result)
     result = subprocess.check_output('git ' + path +' pull',shell=True)
     print(result)
