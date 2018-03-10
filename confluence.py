@@ -1,3 +1,4 @@
+#v1.1.4
 import requests
 import json
 from bs4 import BeautifulSoup
@@ -86,6 +87,9 @@ class Confluence(object):
                 exit()
 
         if tag.string and tag.string != self.unravel_version:
+            tag.string = self.unravel_version
+            should_process = True
+        elif not tag.string and self.unravel_version:
             tag.string = self.unravel_version
             should_process = True
 
