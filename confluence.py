@@ -1,9 +1,17 @@
-#v1.1.4
-import requests
-import json
-from bs4 import BeautifulSoup
-import re
+#v1.1.5
 import subprocess
+try:
+    import requests
+except:
+    subprocess.call(['sudo', 'pip', 'install', 'requests'])
+    import requests
+import json
+try:
+    from bs4 import BeautifulSoup
+except:
+    subprocess.call(['sudo', 'pip', 'install', 'BeautifulSoup4'])
+    from bs4 import BeautifulSoup
+import re
 
 class Confluence(object):
     """docstring for Confluence."""
