@@ -1,4 +1,4 @@
-#v1.1.5
+#v1.1.6
 from confluence import Confluence
 from base64 import b64encode as b64e
 import subprocess
