@@ -2,12 +2,18 @@
 from confluence import Confluence
 from base64 import b64encode as b64e
 import subprocess
+import argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument('-user', '--user', help='Confluence Login', required=True)
+parser.add_argument('-pass', '--pass', help='Confluence Password', required=True)
+argv = parser.parse_args()
 
 def main():
     auto_update()
     unravel_base_url = 'http://localhost:3000'
     atlassian_base_url = 'https://unraveldata.atlassian.net/wiki/rest/api/content/284262500'
-    credentials = b64e('team@unraveldata.com:Unraveldata123!')
+    credentials = b64e('%s:%s' % (argv.user, argv.pass))
 
     confluence = Confluence(unravel_base_url, atlassian_base_url, credentials)
 
