@@ -5,8 +5,8 @@ import subprocess
 import argparse
 
 parser = argparse.ArgumentParser()
-parser.add_argument('-user', '--user', help='Confluence Login', required=True)
-parser.add_argument('-pass', '--pass', help='Confluence Password', required=True)
+parser.add_argument('-user', '--username', help='Confluence Login', required=True)
+parser.add_argument('-pass', '--password', help='Confluence Password', required=True)
 argv = parser.parse_args()
 
 def main():
