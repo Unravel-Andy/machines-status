@@ -13,7 +13,7 @@ def main():
     auto_update()
     unravel_base_url = 'http://localhost:3000'
     atlassian_base_url = 'https://unraveldata.atlassian.net/wiki/rest/api/content/284262500'
-    credentials = b64e('%s:%s' % (argv.user, argv.pass))
+    credentials = b64e('%s:%s' % (argv.username, argv.password))
 
     confluence = Confluence(unravel_base_url, atlassian_base_url, credentials)
 
