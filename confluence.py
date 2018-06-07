@@ -100,7 +100,7 @@ class Confluence(object):
             print('Now Looking for IP address instead\n')
             try:
                 if self.al_base == 'https://unraveldata.atlassian.net/wiki/rest/api/content/502628605':
-                    tag = soup.find(text=self.ip_addr)
+                    tag = soup.find(text=self.ip_addr).find_parent('td').find(text=re.compile('4.[0-9].[0-9].[0-9](.[0-9]b[0-9]{1,4})?')).find_parent()
                     print(str(tag) + '\n')
                 else:
                     tag = soup.find(text=self.ip_addr).find_parent('td').find_previous('td')
