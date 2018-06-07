@@ -1,4 +1,5 @@
-#v1.1.5
+#v1.1.7
+import re
 import subprocess
 try:
     import requests
@@ -21,7 +22,13 @@ class Confluence(object):
         self.get_content_body_url = self.al_base + '?expand=body.storage'
         self.credentials = credentials
         self.unravel_version_url = self.unravel_base + '/version.txt'
-        self.headers = {'Authorization':'Basic %s' % credentials }
+        self.headers = {'Authorization': 'Basic %s' % credentials}
+        self.body = None
+        self.content_ver = None
+        self.content_title = None
+        self.content_stat = None
+        self.content_type = None
+        self.content_stat = None
 
     # Get Main Body Content from Confluence
     def get_content_body(self):
@@ -34,7 +41,7 @@ class Confluence(object):
         hosts = self.get_host()
         self.body = content['body']['storage']['value']
 
-        return {'title' : self.content_title, 'type' : self.content_type, 'stat' : self.content_stat, 'hosts' : hosts}
+        return {'title': self.content_title, 'type': self.content_type, 'stat': self.content_stat, 'hosts': hosts}
 
     # Get Confluence's Content Current Version Number
     def get_content_ver(self):
@@ -42,7 +49,7 @@ class Confluence(object):
 
         self.content_ver = str(json.loads(al_ver_req.text)['version']['number']+1)
 
-        return(self.content_ver)
+        return self.content_ver
 
     # Get Current Hostname and ip address
     def get_host(self):
@@ -53,16 +60,16 @@ class Confluence(object):
     # Save content back to Confluence
     def put_content(self):
         data = {
-                "title" : self.content_title ,
-                "type" : self.content_type ,
-                "status" : self.content_stat ,
-                "version" : {
-                            "number" : self.content_ver,
-                            "minorEdit":True
+                "title": self.content_title,
+                "type": self.content_type,
+                "status": self.content_stat,
+                "version": {
+                            "number": self.content_ver,
+                            "minorEdit": True
                             },
-                "body" : {
-                         "storage" : {
-                                      "value" : self.new_content,
+                "body": {
+                         "storage": {
+                                      "value": self.new_content,
                                           "representation": "storage"
                                      }
                         }
@@ -70,11 +77,11 @@ class Confluence(object):
 
         data = json.loads(json.dumps(data))
         self.headers['content-type'] = 'application/json'
-        res = requests.put(self.al_base, headers=self.headers , json=data)
+        res = requests.put(self.al_base, headers=self.headers, json=data)
         if res.status_code == 200:
-            return (True)
+            return True
         else:
-            return (res.status_code)
+            return res.status_code
 
     # Set New Content that will send back to Confluence
     def set_content(self):
@@ -82,14 +89,22 @@ class Confluence(object):
         soup = BeautifulSoup(self.body, "html.parser")
 
         try:
-            tag = soup.find(text=self.server_name).find_parent('td').find_next('td').find_next('td').find_next('td').find_next('td')
-            print(str(tag) + '\n')
+            if self.al_base == 'https://unraveldata.atlassian.net/wiki/rest/api/content/502628605':
+                tag = soup.find(text=self.server_name).find_parent('td').find(text=re.compile('4.[0-9].[0-9].[0-9](.[0-9]b[0-9]{1,4})?')).find_parent()
+                print(str(tag) + '\n')
+            else:
+                tag = soup.find(text=self.server_name).find_parent('td').find_next('td').find_next('td').find_next('td').find_next('td')
+                print(str(tag) + '\n')
         except Exception as e:
             print('No server name Found')
             print('Now Looking for IP address instead\n')
             try:
-                tag = soup.find(text=self.ip_addr).find_parent('td').find_previous('td')
-                print(str(tag) + '\n')
+                if self.al_base == 'https://unraveldata.atlassian.net/wiki/rest/api/content/502628605':
+                    tag = soup.find(text=self.ip_addr)
+                    print(str(tag) + '\n')
+                else:
+                    tag = soup.find(text=self.ip_addr).find_parent('td').find_previous('td')
+                    print(str(tag) + '\n')
             except:
                 print('No IP address Found')
                 exit()
@@ -101,10 +116,9 @@ class Confluence(object):
             tag.string = self.unravel_version
             should_process = True
 
-
         self.new_content = str(soup)
 
-        return (should_process)
+        return should_process
 
     # Get Unravel Version Number From version.txt
     def unravel_ver(self):
@@ -114,11 +128,11 @@ class Confluence(object):
             if res.status_code == 200:
                 unravel_version = re.search('[0-9]{1,2}.[0-9]{1,2}.[0-9]{,2}.[0-9a-zA-Z]{,6}',res.text)
                 self.unravel_version = str(unravel_version.group(0))
-                return(self.unravel_version)
+                return self.unravel_version
             else:
                 print('Unknowm Unravel Version')
                 self.unravel_version = ''
-                return (self.unravel_version)
+                return self.unravel_version
         except:
             self.unravel_version = ''
-            return (self.unravel_version)
+            return self.unravel_version
