@@ -131,8 +131,8 @@ class Confluence(object):
                 return self.unravel_version
             else:
                 print('Unknowm Unravel Version')
-                self.unravel_version = ''
+                self.unravel_version = '4.0.0.0'
                 return self.unravel_version
         except:
-            self.unravel_version = ''
+            self.unravel_version = '4.0.0.0'
             return self.unravel_version
