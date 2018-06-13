@@ -57,7 +57,7 @@ def main():
             print('Put new info to Confluence Fail')
 
     else:
-        print('%s content no change should not process' % body['title'])
+        print('%s content no change should not process\n' % body['title'])
 
     # Check whether test-cluster page need update or not
     if confluence2.set_content() == True:
@@ -69,7 +69,7 @@ def main():
             print('Put new info to Confluence Fail')
 
     else:
-        print('%s no change should not process' % body2['title'])
+        print('%s no change should not process\n' % body2['title'])
 
 
 if __name__ == '__main__':
