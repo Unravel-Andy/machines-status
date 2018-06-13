@@ -1,4 +1,4 @@
-#v1.1.7
+#v1.1.8
 import re
 import subprocess
 try:
@@ -32,7 +32,7 @@ class Confluence(object):
 
     # Get Main Body Content from Confluence
     def get_content_body(self):
-        res = requests.get(self.get_content_body_url,headers = self.headers)
+        res = requests.get(self.get_content_body_url, headers=self.headers)
         content = json.loads(res.text)
 
         self.content_title = content['title']
@@ -101,10 +101,10 @@ class Confluence(object):
             try:
                 if self.al_base == 'https://unraveldata.atlassian.net/wiki/rest/api/content/502628605':
                     tag = soup.find(text=self.ip_addr).find_parent('td').find(text=re.compile('4.[0-9].[0-9].[0-9](.[0-9]b[0-9]{1,4})?')).find_parent()
-                    print(str(tag) + '\n')
+                    print(str(tag))
                 else:
                     tag = soup.find(text=self.ip_addr).find_parent('td').find_previous('td')
-                    print(str(tag) + '\n')
+                    print(str(tag))
             except:
                 print('No IP address Found')
                 exit()
@@ -126,7 +126,7 @@ class Confluence(object):
             res = requests.get(self.unravel_version_url)
 
             if res.status_code == 200:
-                unravel_version = re.search('[0-9]{1,2}.[0-9]{1,2}.[0-9]{,2}.[0-9a-zA-Z]{,6}',res.text)
+                unravel_version = re.search('[0-9]{1,2}.[0-9]{1,2}.[0-9]{,2}.[0-9a-zA-Z]{,6}', res.text)
                 self.unravel_version = str(unravel_version.group(0))
                 return self.unravel_version
             else:
