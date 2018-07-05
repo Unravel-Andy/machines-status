@@ -107,7 +107,7 @@ class Confluence(object):
                     print(str(tag))
             except:
                 print('No IP address Found')
-                exit()
+                return should_process
 
         if tag.string and tag.string != self.unravel_version:
             tag.string = self.unravel_version
