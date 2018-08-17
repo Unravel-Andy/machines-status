@@ -3,6 +3,7 @@ from confluence import Confluence
 from base64 import b64encode as b64e
 import subprocess
 import argparse
+import os
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-user', '--username', help='Confluence Login', required=True)
@@ -12,6 +13,7 @@ argv = parser.parse_args()
 
 def auto_update():
     print('Updating Script\n')
+    os.chdir('/usr/bin/machines-status/')
     path = '--git-dir=/usr/bin/machines-status/.git'
     result = subprocess.check_output('git ' + path +' checkout -- .',shell=True)
     print(result)
