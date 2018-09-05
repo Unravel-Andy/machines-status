@@ -4,6 +4,7 @@ import subprocess
 try:
     import requests
 except:
+    subprocess.call(['sudo', 'yum', 'install', 'epel-release', '-y'])
     subprocess.call(['sudo', 'yum', 'install', 'python-pip', '-y'])
     subprocess.call(['sudo', 'pip', 'install', 'requests'])
     import requests
