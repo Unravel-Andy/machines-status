@@ -1,4 +1,4 @@
-#v1.1.7
+#v1.1.8
 from confluence import Confluence
 from base64 import b64encode as b64e
 import subprocess
@@ -8,6 +8,7 @@ import os
 parser = argparse.ArgumentParser()
 parser.add_argument('-user', '--username', help='Confluence Login', required=True)
 parser.add_argument('-pass', '--password', help='Confluence Password', required=True)
+parser.add_argument('-alias', '--alias', help='Alias name for the machine', default=None)
 argv = parser.parse_args()
 
 
@@ -28,8 +29,8 @@ def main():
     atlassian_base_url2 = 'https://unraveldata.atlassian.net/wiki/rest/api/content/502628605'
     credentials = b64e('%s:%s' % (argv.username, argv.password))
 
-    confluence = Confluence(unravel_base_url, atlassian_base_url, credentials)
-    confluence2 = Confluence(unravel_base_url, atlassian_base_url2, credentials)
+    confluence = Confluence(unravel_base_url, atlassian_base_url, credentials, alias_name=argv.alias)
+    confluence2 = Confluence(unravel_base_url, atlassian_base_url2, credentials, alias_name=argv.alias)
     
     unravel_ver = confluence.unravel_ver()
     unravel_ver = confluence2.unravel_ver()

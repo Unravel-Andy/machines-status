@@ -19,7 +19,7 @@ import re
 
 class Confluence(object):
     """docstring for Confluence."""
-    def __init__(self, unravel_base_url, atlassian_base_url, credentials):
+    def __init__(self, unravel_base_url, atlassian_base_url, credentials, alias_name=None):
         self.unravel_base = unravel_base_url
         self.al_base = atlassian_base_url
         self.get_content_body_url = self.al_base + '?expand=body.storage'
@@ -32,6 +32,9 @@ class Confluence(object):
         self.content_stat = None
         self.content_type = None
         self.content_stat = None
+        self.alias_name = alias_name
+        self.server_name = None
+        self.ip_addr = None
 
     # Get Main Body Content from Confluence
     def get_content_body(self):
@@ -92,7 +95,7 @@ class Confluence(object):
         soup = BeautifulSoup(self.body, "html.parser")
 
         try:
-            if self.al_base == 'https://unraveldata.atlassian.net/wiki/rest/api/content/502628605':
+            if self.al_base == 'https://unraveldata.atlassian.net/wiki/rest/api/content/502628605':  # Test Cluster Wiki Page
                 tag = soup.find(text=self.server_name).find_next('span').find(text=re.compile('4.[0-9].[0-9].[0-9](.[0-9]b[0-9]{1,4})?')).find_parent()
                 print(str(tag))
             else:
@@ -110,6 +113,17 @@ class Confluence(object):
                     print(str(tag))
             except:
                 print('No IP address Found')
+                print('Now Looking for alias name instead\n')
+                try:
+                    if self.al_base == 'https://unraveldata.atlassian.net/wiki/rest/api/content/502628605':
+                        tag = soup.find(text=self.alias_name).find_next('span').find(
+                            text=re.compile('4.[0-9].[0-9].[0-9](.[0-9]b[0-9]{1,4})?')).find_parent()
+                        print(str(tag))
+                    else:
+                        tag = soup.find(text=self.alias_name).find_parent('td').find_previous('td')
+                        print(str(tag))
+                except:
+                    print('No alias name Found')
                 return should_process
 
         if tag.string and tag.string != self.unravel_version:
@@ -120,7 +134,6 @@ class Confluence(object):
             should_process = True
 
         self.new_content = str(soup)
-
         return should_process
 
     # Get Unravel Version Number From version.txt
