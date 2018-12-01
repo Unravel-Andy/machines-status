@@ -123,6 +123,7 @@ class Confluence(object):
                         print(str(tag))
                 except:
                     print('No alias name Found')
+                    return should_process
 
         if tag.string and tag.string != self.unravel_version:
             tag.string = self.unravel_version
