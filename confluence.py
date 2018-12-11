@@ -96,7 +96,7 @@ class Confluence(object):
 
         try:
             if self.al_base == 'https://unraveldata.atlassian.net/wiki/rest/api/content/502628605':  # Test Cluster Wiki Page
-                tag = soup.find(text=re.compile(self.server_name)).find_next('span').find(text=re.compile('4.[0-9].[0-9].[0-9](.[0-9]b[0-9]{1,4})?')).find_parent()
+                tag = soup.find(text=self.server_name).find_next('span').find(text=re.compile('4.[0-9].[0-9].[0-9](.[0-9]b[0-9]{1,4})?')).find_parent()
                 print(str(tag))
             else:
                 tag = soup.find(text=self.server_name).find_parent('td').find_next('td').find_next('td').find_next('td').find_next('td')
@@ -106,7 +106,7 @@ class Confluence(object):
             print('Now Looking for IP address instead\n')
             try:
                 if self.al_base == 'https://unraveldata.atlassian.net/wiki/rest/api/content/502628605':
-                    tag = soup.find(text=re.compile(self.ip_addr+'.*')).find_next('span').find(text=re.compile('4.[0-9].[0-9].[0-9](.[0-9]b[0-9]{1,4})?')).find_parent()
+                    tag = soup.find(text=self.ip_addr).find_next('span').find(text=re.compile('4.[0-9].[0-9].[0-9](.[0-9]b[0-9]{1,4})?')).find_parent()
                     print(str(tag))
                 else:
                     tag = soup.find(text=self.ip_addr).find_parent('td').find_previous('td')
