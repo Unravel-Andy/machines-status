@@ -22,33 +22,32 @@ def auto_update():
     print(result)
 
 
-def main():
-    auto_update()
+def update_confluence(atlassian_base_url):
     unravel_base_url = 'http://localhost:3000'
     atlassian_base_url = 'https://unraveldata.atlassian.net/wiki/rest/api/content/284262500'
-    atlassian_base_url2 = 'https://unraveldata.atlassian.net/wiki/rest/api/content/502628605'
+    # atlassian_base_url2 = 'https://unraveldata.atlassian.net/wiki/rest/api/content/502628605'
     credentials = b64e('%s:%s' % (argv.username, argv.password))
 
     confluence = Confluence(unravel_base_url, atlassian_base_url, credentials, alias_name=argv.alias)
-    confluence2 = Confluence(unravel_base_url, atlassian_base_url2, credentials, alias_name=argv.alias)
-    
+    # confluence2 = Confluence(unravel_base_url, atlassian_base_url2, credentials, alias_name=argv.alias)
+
     unravel_ver = confluence.unravel_ver()
-    unravel_ver = confluence2.unravel_ver()
+    # unravel_ver = confluence2.unravel_ver()
     print('Current unravel_ver is: %s\n' % unravel_ver)
 
     content = confluence.get_content_ver()
     print('Editing Content Version: %s\n' % content)
-    content2 = confluence2.get_content_ver()
-    print('Editing Content2 Version: %s\n' % content2)
+    # content2 = confluence2.get_content_ver()
+    # print('Editing Content2 Version: %s\n' % content2)
 
     body = confluence.get_content_body()
     print('Editing Content Title: %s' % body['title'])
     print('Editing Content Status: %s' % body['stat'])
     print('Editing Content type: %s\n' % body['type'])
-    body2 = confluence2.get_content_body()
-    print('Editing Content Title: %s' % body2['title'])
-    print('Editing Content Status: %s' % body2['stat'])
-    print('Editing Content type: %s\n' % body2['type'])
+    # body2 = confluence2.get_content_body()
+    # print('Editing Content Title: %s' % body2['title'])
+    # print('Editing Content Status: %s' % body2['stat'])
+    # print('Editing Content type: %s\n' % body2['type'])
 
     # Check whether live machine status page need update or not
     if confluence.set_content() == True:
@@ -62,17 +61,23 @@ def main():
     else:
         print('%s content no change should not process\n' % body['title'])
 
-    # Check whether test-cluster page need update or not
-    if confluence2.set_content() == True:
-        print('should process and put content in %s' % body2['title'])
-        result = confluence2.put_content()
-        if result:
-            print('Put new info to Confluence Success')
-        else:
-            print('Put new info to Confluence Fail')
+    # # Check whether test-cluster page need update or not
+    # if confluence2.set_content() == True:
+    #     print('should process and put content in %s' % body2['title'])
+    #     result = confluence2.put_content()
+    #     if result:
+    #         print('Put new info to Confluence Success')
+    #     else:
+    #         print('Put new info to Confluence Fail')
+    #
+    # else:
+    #     print('%s no change should not process\n' % body2['title'])
 
-    else:
-        print('%s no change should not process\n' % body2['title'])
+
+def main():
+    auto_update()
+    update_confluence(atlassian_base_url='https://unraveldata.atlassian.net/wiki/rest/api/content/284262500')
+    update_confluence(atlassian_base_url='https://unraveldata.atlassian.net/wiki/rest/api/content/502628605')
 
 
 if __name__ == '__main__':
