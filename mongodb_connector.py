@@ -13,7 +13,7 @@ class DBConnector:
         self.db_collection = database[db_collection]
 
     def update(self, query, new_data):
-        self.db_collection.update_one(query, {"$set": new_data})
+        self.db_collection.update_one(query, {"$set": new_data}, upsert=True)
 
     def read(self, query):
         return self.db_collection.find(query)
