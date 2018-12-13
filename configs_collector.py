@@ -267,7 +267,11 @@ class AMMetrics:
         return am_kafka
 
     def get_host_components(self, component_name):
-        req = self._get_req("{}/{}".format(self.api_with_name, 'host_components?HostRoles/component_name=%s' % component_name))
+        try:
+            req = self._get_req("{}/{}".format(self.api_with_name, 'host_components?HostRoles/component_name=%s' % component_name))
+        except:
+            print("Service {0} not found".format(component_name))
+            return {"items":[]}
         return req.json()
 
     def get_configs(self, conf_type):
