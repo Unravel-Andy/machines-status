@@ -1,4 +1,9 @@
-import pymongo
+try:
+    import subprocess
+    import pymongo
+except:
+    subprocess.call('pip install pymongo', shell=True)
+    import pymongo
 
 
 class DBConnector:
