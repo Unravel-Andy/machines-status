@@ -3,8 +3,8 @@
 Script to get configurations from CM/AM
 """
 import re
+import os
 import requests
-import urllib3.exceptions
 from subprocess import PIPE, Popen
 
 
@@ -298,6 +298,20 @@ def get_server():
     elif cluster_type == "MAPR":
         pass
     return server_host
+
+def get_unravel_ver():
+    """
+    :return: installed unravel version number
+    """
+    unravel_version_path = "/usr/local/unravel/ngui/www/version.txt"
+    unravel_ver = "UNKNOWN"
+    if os.path.exists(unravel_version_path):
+        with open(unravel_version_path, 'r') as f:
+            version_file = f.read()
+            f.close()
+        if re.search('4\.[0-9]\.[0-9].*', version_file):
+            return re.search('4\.[0-9]\.[0-9].*', version_file).group(0)
+    return unravel_ver
 
 
 cluster_type = get_cluster_type()

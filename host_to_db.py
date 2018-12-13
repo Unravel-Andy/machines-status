@@ -10,7 +10,7 @@ def get_host():
     return server_name, ip_addr
 
 
-def send_to_db(alias_name, unravel_ver):
+def send_to_db(alias_name):
     db_connector = mongodb_connector.DBConnector(db_host="172.66.1.211")
     if CC.cluster_type == "CDH":
         cm_host = CC.get_server()
@@ -30,7 +30,7 @@ def send_to_db(alias_name, unravel_ver):
                     "impala": cm_metrics.get_impala_daemon(),
                     "oozie_server": cm_metrics.get_cm_oozie_server(),
                     "kafka_broker": cm_metrics.get_cm_kafka_brokers(),
-                    "unravel_version": unravel_ver,
+                    "unravel_version": CC.get_unravel_ver(),
                     "update_time": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
         db_connector.update(query, new_data)
     elif CC.cluster_type == "HDP":
@@ -51,7 +51,7 @@ def send_to_db(alias_name, unravel_ver):
                     "ats": am_metrics.get_am_ats(),
                     "oozie_server": am_metrics.get_am_oozie_server(),
                     "kafka_broker": am_metrics.get_am_kafka_broker(),
-                    "unravel_version": unravel_ver,
+                    "unravel_version": CC.get_unravel_ver(),
                     "update_time": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
         db_connector.update(query, new_data)
     elif CC.cluster_type == "MAPR":
