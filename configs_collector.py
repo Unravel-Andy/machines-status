@@ -207,8 +207,6 @@ class AMMetrics:
     def get_am_active_namenode(self):
         am_active_namenode = {}
         req = self.get_host_components('NAMENODE')
-        if not req:
-            return "None"
         for item in req['items']:
             ha_state = self._get_req(item['href']).json()['HostRoles'].get('ha_state', None)
             if ha_state == 'ACTIVE' or None:
@@ -227,8 +225,6 @@ class AMMetrics:
     def get_am_hive_metastore(self):
         am_hive_metastore = {'metastore_hosts': []}
         req = self.get_host_components('HIVE_METASTORE')
-        if not req:
-            return "None"
         for item in req['items']:
             am_hive_metastore['metastore_hosts'].append(item['HostRoles']['host_name'])
         return am_hive_metastore
@@ -236,8 +232,6 @@ class AMMetrics:
     def get_am_hiveserver2(self):
         am_hs2 = {'hive_server2_hosts': []}
         req = self.get_host_components('HIVE_SERVER')
-        if not req:
-            return "None"
         for item in req['items']:
             am_hs2['hive_server2_hosts'].append(item['HostRoles']['host_name'])
         am_hs2['hs2_thrift_port'] = self.get_configs('hive-site')['items'][0]['properties'].get('hive.server2.thrift.port', 10000)
@@ -246,8 +240,6 @@ class AMMetrics:
     def get_am_oozie_server(self):
         am_oozie = {}
         req = self.get_host_components('OOZIE_SERVER')
-        if not req:
-            return "None"
         for item in req['items']:
             am_oozie['oozie_server_host'] = item['HostRoles']['host_name']
         oozie_port = self.get_configs('oozie-site')['items'][0]['properties'].get('oozie.base.url', 11000).split(':')[-1].split('/')[0]
@@ -257,8 +249,6 @@ class AMMetrics:
     def get_am_zookeeper(self):
         am_zk = {'zk_server_hosts': []}
         req = self.get_host_components('ZOOKEEPER_SERVER')
-        if not req:
-            return "None"
         for item in req['items']:
             am_zk['zk_server_hosts'].append(item['HostRoles']['host_name'])
         am_zk['zk_client_port'] = self.get_configs('zoo.cfg')['items'][0]['properties'].get('clientPort', 2181)
@@ -267,8 +257,6 @@ class AMMetrics:
     def get_am_kafka_broker(self):
         am_kafka = {'broker_hosts': []}
         req = self.get_host_components('KAFKA_BROKER')
-        if not req:
-            return "None"
         for item in req['items']:
             am_kafka['broker_hosts'].append(item['HostRoles']['host_name'])
         am_kafka['broker_port'] = self.get_configs('kafka-broker')['items'][0]['properties'].get('port', 9092)
@@ -279,10 +267,11 @@ class AMMetrics:
         return am_kafka
 
     def get_host_components(self, component_name):
-        req = self._get_req("{}/{}".format(self.api_with_name, 'host_components?HostRoles/component_name=%s' % component_name))
-        if len(req.json()['items']) == 0:
+        try:
+            req = self._get_req("{}/{}".format(self.api_with_name, 'host_components?HostRoles/component_name=%s' % component_name))
+        except:
             print("Service {0} not found".format(component_name))
-            return None
+            return {"items":[]}
         return req.json()
 
     def get_configs(self, conf_type):
@@ -291,7 +280,31 @@ class AMMetrics:
         return req.json()
 
 
+class MAPRMetrics():
+    def __init__(self):
+        self.maprcli_check()
+
+    @staticmethod
+    def maprcli_check():
+        if not os.path.exists("/usr/bin/maprcli"):
+            print("maprcli command not found")
+            exit(1)
+
+    @staticmethod
+    def get_mapr_version():
+        popen_req = Popen("maprcli dashboard info -version true", shell=True, stderr=PIPE, stdout=PIPE)
+        result = popen_req.communicate()
+        if popen_req.returncode != 0:
+            print(result[1])
+            return None
+        else:
+            return result[0].splitlines()[-1]
+
 def pretty_print(dict_in):
+    """
+    :param dict_in: dict
+    pretty printed dict content
+    """
     for key, val in dict_in.iteritems():
         if type(val) is list:
             print("{0}:\n\t{1}".format(key, '\n\t'.join(val)))
@@ -361,7 +374,8 @@ if __name__ == '__main__':
         pretty_print(am_metrics.get_am_kafka_broker())
         pretty_print(am_metrics.get_am_ats())
     elif cluster_type == "MAPR":
-        pass
+        mapr_metrics = MAPRMetrics()
+        print("MAPR Version: ".format(MAPRMetrics.get_mapr_version()))
     else:
         print("Unknown cluster type exiting")
         exit(1)
