@@ -60,5 +60,6 @@ def send_to_db(alias_name):
         query = {"hostname": host_name}
         new_data = {"alias": alias_name,
                     "cluster_type": "MAPR",
-                    "cluster_version": mapr_metrics.get_mapr_version()}
+                    "cluster_version": mapr_metrics.get_mapr_version(),
+                    "unravel_version": CC.get_unravel_ver()}
         db_connector.update(query, new_data)
