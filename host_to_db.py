@@ -12,6 +12,7 @@ def get_host():
 
 def send_to_db(alias_name):
     db_connector = mongodb_connector.DBConnector(db_host="172.66.1.211")
+    cur_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     if CC.cluster_type == "CDH":
         cm_host = CC.get_server()
         try:
@@ -31,7 +32,7 @@ def send_to_db(alias_name):
                     "oozie_server": cm_metrics.get_cm_oozie_server(),
                     "kafka_broker": cm_metrics.get_cm_kafka_brokers(),
                     "unravel_version": CC.get_unravel_ver(),
-                    "update_time": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
+                    "update_time": cur_time}
         db_connector.update(query, new_data)
     elif CC.cluster_type == "HDP":
         am_host = CC.get_server()
@@ -52,7 +53,7 @@ def send_to_db(alias_name):
                     "oozie_server": am_metrics.get_am_oozie_server(),
                     "kafka_broker": am_metrics.get_am_kafka_broker(),
                     "unravel_version": CC.get_unravel_ver(),
-                    "update_time": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
+                    "update_time": cur_time}
         db_connector.update(query, new_data)
     elif CC.cluster_type == "MAPR":
         mapr_metrics = CC.MAPRMetrics()
@@ -61,5 +62,6 @@ def send_to_db(alias_name):
         new_data = {"alias": alias_name,
                     "cluster_type": "MAPR",
                     "cluster_version": mapr_metrics.get_mapr_version(),
-                    "unravel_version": CC.get_unravel_ver()}
+                    "unravel_version": CC.get_unravel_ver(),
+                    "update_time": cur_time}
         db_connector.update(query, new_data)
