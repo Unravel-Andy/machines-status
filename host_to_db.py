@@ -55,4 +55,10 @@ def send_to_db(alias_name):
                     "update_time": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
         db_connector.update(query, new_data)
     elif CC.cluster_type == "MAPR":
-        pass
+        mapr_metrics = CC.MAPRMetrics()
+        host_name, host_ip = get_host()
+        query = {"hostname": host_name}
+        new_data = {"alias": alias_name,
+                    "cluster_type": "MAPR",
+                    "cluster_version": mapr_metrics.get_mapr_version()}
+        db_connector.update(query, new_data)
