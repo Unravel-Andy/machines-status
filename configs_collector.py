@@ -184,7 +184,7 @@ class AMMetrics:
         rpm_ver = Popen("rpm -qa| grep hdp-select | awk -F '-' '{ print $3 }'", shell=True, stdout=PIPE)
         res = rpm_ver.communicate()
         if rpm_ver.returncode == 0:
-            self.cluster_ver = res[0]
+            self.cluster_ver = res[0].replace("\n", "")
         else:
             self.cluster_ver = "UNKNOWN"
         self.cur_config_tag = self._get_req("{0}/{1}".format(self.api_url, 'clusters?fields=Clusters/desired_configs')).json()['items'][0]['Clusters']['desired_configs']
