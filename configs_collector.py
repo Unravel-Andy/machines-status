@@ -181,7 +181,12 @@ class AMMetrics:
         self.api_url = "{0}://{1}:{2}/api/v{3}".format(protocol, host, port, api_ver)
         cluster_infos = self._get_req("{0}/{1}".format(self.api_url, 'clusters')).json()['items'][0]['Clusters']
         self.cluster_name = cluster_infos.get('cluster_name', 'UNKNOWN')
-        self.cluster_ver = cluster_infos.get("version", "UNKNOWN")
+        rpm_ver = Popen("rpm -qa| grep hdp-select | awk -F '-' '{ print $3 }'", shell=True, stdout=PIPE)
+        res = rpm_ver.communicate()
+        if rpm_ver.returncode == 0:
+            self.cluster_ver = res[0]
+        else:
+            self.cluster_ver = "UNKNOWN"
         self.cur_config_tag = self._get_req("{0}/{1}".format(self.api_url, 'clusters?fields=Clusters/desired_configs')).json()['items'][0]['Clusters']['desired_configs']
         self.api_with_name = "{0}/clusters/{1}".format(self.api_url, self.cluster_name)
         self.configs_base_url = "{0}/{1}".format(self.api_url, 'clusters/' + self.cluster_name + '/configurations')
