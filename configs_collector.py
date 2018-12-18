@@ -318,6 +318,17 @@ def pretty_print(dict_in):
             print("{0}: {1}".format(key, val))
     print('')
 
+def get_unravel_db_type():
+    unravel_prop_path = "/usr/local/unravel/etc/unravel.properties"
+    if os.path.exists(unravel_prop_path):
+        with open(unravel_prop_path, "r") as f:
+            regex = r"^unravel.jdbc.url=jdbc:(.*?):.*"
+            for line in f.readlines():
+                if re.match(regex, line):
+                    db_type = re.findall(regex, line)[0]
+            return db_type
+    else:
+        return "UNKNOWN"
 
 def get_server():
     server_host = None
@@ -351,6 +362,7 @@ def get_unravel_ver():
 cluster_type = get_cluster_type()
 
 if __name__ == '__main__':
+    db_type = get_unravel_db_type()
     if cluster_type == "CDH":
         cm_host = get_server()
         try:

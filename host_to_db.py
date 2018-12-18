@@ -32,7 +32,8 @@ def send_to_db(alias_name):
                     "oozie_server": cm_metrics.get_cm_oozie_server(),
                     "kafka_broker": cm_metrics.get_cm_kafka_brokers(),
                     "unravel_version": CC.get_unravel_ver(),
-                    "update_time": cur_time}
+                    "update_time": cur_time,
+                    "unravel_db_type": CC.get_unravel_db_type()}
         db_connector.update(query, new_data)
     elif CC.cluster_type == "HDP":
         am_host = CC.get_server()
@@ -53,7 +54,8 @@ def send_to_db(alias_name):
                     "oozie_server": am_metrics.get_am_oozie_server(),
                     "kafka_broker": am_metrics.get_am_kafka_broker(),
                     "unravel_version": CC.get_unravel_ver(),
-                    "update_time": cur_time}
+                    "update_time": cur_time,
+                    "unravel_db_type": CC.get_unravel_db_type()}
         db_connector.update(query, new_data)
     elif CC.cluster_type == "MAPR":
         mapr_metrics = CC.MAPRMetrics()
@@ -63,5 +65,6 @@ def send_to_db(alias_name):
                     "cluster_type": "MAPR",
                     "cluster_version": mapr_metrics.get_mapr_version(),
                     "unravel_version": CC.get_unravel_ver(),
-                    "update_time": cur_time}
+                    "update_time": cur_time,
+                    "unravel_db_type": CC.get_unravel_db_type()}
         db_connector.update(query, new_data)
