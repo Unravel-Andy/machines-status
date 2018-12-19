@@ -15,7 +15,7 @@ def get_host():
 def get_alias_name(hostname):
     alias_name = "UNKNOWN"
     try:
-        popen_prop = Popen("all-node-list | grep {0}".format(hostname), shell=True)
+        popen_prop = Popen("bash -c '. /etc/profile && all-node-list | grep {0}'".format(hostname), shell=True, stdout=PIPE)
         result = popen_prop.communicate()
         alias_name = re.split("\s|\.", result[0])[0]
         return alias_name

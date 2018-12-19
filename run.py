@@ -57,7 +57,7 @@ def main():
     update_confluence(atlassian_base_url='https://unraveldata.atlassian.net/wiki/rest/api/content/284262500')
     update_confluence(atlassian_base_url='https://unraveldata.atlassian.net/wiki/rest/api/content/502628605')
     print("Sending configs to Database")
-    host_to_db.send_to_db()
+    host_to_db.send_to_db(alias_name=argv.alias)
 
 
 if __name__ == '__main__':
