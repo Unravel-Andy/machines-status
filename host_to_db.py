@@ -1,7 +1,9 @@
+import re
 import subprocess
 import datetime
 import configs_collector as CC
 import mongodb_connector
+from subprocess import Popen, PIPE
 
 
 def get_host():
@@ -10,7 +12,21 @@ def get_host():
     return server_name, ip_addr
 
 
-def send_to_db(alias_name):
+def get_alias_name(hostname):
+    alias_name = "UNKNOWN"
+    try:
+        popen_prop = Popen("all-node-list | grep {0}".format(hostname), shell=True)
+        result = popen_prop.communicate()
+        alias_name = re.split("\s|\.", result[0])[0]
+        return alias_name
+    except:
+        return alias_name
+
+
+def send_to_db(alias_name=None):
+    host_name, host_ip = get_host()
+    if not alias_name:
+        alias_name = get_alias_name(host_name)
     db_connector = mongodb_connector.DBConnector(db_host="172.66.1.211")
     cur_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     if CC.cluster_type == "CDH":
@@ -19,7 +35,6 @@ def send_to_db(alias_name):
             cm_metrics = CC.CMMetrics(cm_host, 7180, 'admin', 'admin')
         except:
             cm_metrics = CC.CMMetrics(cm_host, 7183, 'admin', 'admin', protocol='https')
-        host_name, host_ip = get_host()
         query = {"hostname": host_name}
         new_data = {"alias": alias_name,
                     "cluster_type": "CDH",
@@ -41,7 +56,6 @@ def send_to_db(alias_name):
             am_metrics = CC.AMMetrics(am_host, 8080, 'admin', 'admin')
         except:
             am_metrics = CC.AMMetrics(am_host, 8443, 'admin', 'admin', protocol='https')
-        host_name, host_ip = get_host()
         query = {"hostname": host_name}
         new_data = {"alias": alias_name,
                     "cluster_type": "HDP",
@@ -59,7 +73,6 @@ def send_to_db(alias_name):
         db_connector.update(query, new_data)
     elif CC.cluster_type == "MAPR":
         mapr_metrics = CC.MAPRMetrics()
-        host_name, host_ip = get_host()
         query = {"hostname": host_name}
         new_data = {"alias": alias_name,
                     "cluster_type": "MAPR",
