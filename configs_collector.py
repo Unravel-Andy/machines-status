@@ -333,7 +333,7 @@ def get_unravel_db_type():
                     db_type = re.findall(regex, line)[0]
         if db_type == "mysql" or db_type == "mariadb":
             get_ver = Popen("echo 'select VERSION();' | /usr/local/unravel/install_bin/db_access.sh", shell=True, stdout=PIPE).communicate()
-            db_ver = get_ver[0].split("\n")[-2]
+            db_ver = get_ver[0].split("\n")[-2].split("-")[0]
         elif db_type == "postgresql":
             get_ver = Popen("echo 'select VERSION();' | /usr/local/unravel/install_bin/db_access.sh", shell=True, stdout=PIPE).communicate()
             if re.search("PostgreSQL [0-9]+.[0-9]+", get_ver[0]):
