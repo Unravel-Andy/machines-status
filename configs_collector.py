@@ -319,16 +319,28 @@ def pretty_print(dict_in):
     print('')
 
 def get_unravel_db_type():
+    """
+    :return: db_type: db type unravel is connecting, db_ver: db version unravel is connecting
+    """
     unravel_prop_path = "/usr/local/unravel/etc/unravel.properties"
+    db_type = "UNKNOWN"
+    db_ver = ""
     if os.path.exists(unravel_prop_path):
         with open(unravel_prop_path, "r") as f:
             regex = r"^unravel.jdbc.url=jdbc:(.*?):.*"
             for line in f.readlines():
                 if re.match(regex, line):
                     db_type = re.findall(regex, line)[0]
-            return db_type
+        if db_type == "mysql" or db_type == "mariadb":
+            get_ver = Popen("echo 'select VERSION();' | /usr/local/unravel/install_bin/db_access.sh", shell=True, stdout=PIPE).communicate()
+            db_ver = get_ver[0].split("\n")[-2]
+        elif db_type == "postgresql":
+            get_ver = Popen("echo 'select VERSION();' | /usr/local/unravel/install_bin/db_access.sh", shell=True, stdout=PIPE).communicate()
+            if re.search("PostgreSQL [0-9]+.[0-9]+", get_ver[0]):
+                db_ver = re.search("PostgreSQL ([0-9]+.[0-9]+)", get_ver[0]).group(1)
+        return "{0} {1}".format(db_type, db_ver)
     else:
-        return "UNKNOWN"
+        return "{0} {1}".format(db_type, db_ver)
 
 def get_server():
     server_host = None
