@@ -354,14 +354,14 @@ def get_unravel_db_type():
                     db_type = re.findall(regex, line)[0]
         if db_type == "mysql" or db_type == "mariadb":
             get_ver = Popen("echo 'select VERSION();' | /usr/local/unravel/install_bin/db_access.sh", shell=True, stdout=PIPE).communicate()
-            db_ver = get_ver[0].split("\n")[-2]
+            db_ver = get_ver[0].split("\n")[-2].split("-")[0]
         elif db_type == "postgresql":
             get_ver = Popen("echo 'select VERSION();' | /usr/local/unravel/install_bin/db_access.sh", shell=True, stdout=PIPE).communicate()
             if re.search("PostgreSQL [0-9]+.[0-9]+", get_ver[0]):
                 db_ver = re.search("PostgreSQL ([0-9]+.[0-9]+)", get_ver[0]).group(1)
-        return db_type, db_ver
+        return "{0} {1}".format(db_type, db_ver)
     else:
-        return db_type, db_ver
+        return "{0} {1}".format(db_type, db_ver)
 
 def get_server():
     server_host = None
@@ -403,7 +403,6 @@ if __name__ == '__main__':
         except:
             cm_metrics = CMMetrics(cm_host, 7183, 'admin', 'admin', protocol='https')
         print("CDH Version: {0}".format(cm_metrics.cluster_ver))
-        cm_metrics.get_secure_type()
         pretty_print(cm_metrics.get_cm_active_namenode())
         pretty_print(cm_metrics.get_cm_hive_metastore())
         pretty_print(cm_metrics.get_cm_hiveserver2())
