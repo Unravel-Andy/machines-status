@@ -158,6 +158,17 @@ class CMMetrics:
             print("get role config request return: " + str(req.status_code))
         return req.json()['items']
 
+    def get_secure_type(self):
+        secure_type = "UNKNOWN"
+        try:
+            req = self._get_req("{0}/cm/kerberosPrincipals".format(self.api_url))
+            if len(req.json()["items"]) > 0:
+                secure_type = "KERBEROS"
+        except Exception as e:
+            pass
+        finally:
+            return secure_type
+
     def get_service_roles(self, service_name):
         req = self._get_req("{}/{}/roles".format(self.services_api_url, service_name))
         if req.status_code == 404:
@@ -279,6 +290,16 @@ class AMMetrics:
             return {"items":[]}
         return req.json()
 
+    def get_secure_type(self):
+        secure_type = "UNKNOWN"
+        try:
+            req = self._get_req("{0}/clusters?fields=Clusters/security_type".format(self.api_url))
+            secure_type = req.json()["items"][0]["Clusters"]["security_type"]
+        except Exception as e:
+            pass
+        finally:
+            return secure_type
+
     def get_configs(self, conf_type):
         conf_tag = self.cur_config_tag[conf_type]['tag']
         req = self._get_req("{0}?{1}".format(self.configs_base_url, 'type={0}&tag={1}'.format(conf_type, conf_tag)))
@@ -333,14 +354,14 @@ def get_unravel_db_type():
                     db_type = re.findall(regex, line)[0]
         if db_type == "mysql" or db_type == "mariadb":
             get_ver = Popen("echo 'select VERSION();' | /usr/local/unravel/install_bin/db_access.sh", shell=True, stdout=PIPE).communicate()
-            db_ver = get_ver[0].split("\n")[-2].split("-")[0]
+            db_ver = get_ver[0].split("\n")[-2]
         elif db_type == "postgresql":
             get_ver = Popen("echo 'select VERSION();' | /usr/local/unravel/install_bin/db_access.sh", shell=True, stdout=PIPE).communicate()
             if re.search("PostgreSQL [0-9]+.[0-9]+", get_ver[0]):
                 db_ver = re.search("PostgreSQL ([0-9]+.[0-9]+)", get_ver[0]).group(1)
-        return "{0} {1}".format(db_type, db_ver)
+        return db_type, db_ver
     else:
-        return "{0} {1}".format(db_type, db_ver)
+        return db_type, db_ver
 
 def get_server():
     server_host = None
@@ -382,6 +403,7 @@ if __name__ == '__main__':
         except:
             cm_metrics = CMMetrics(cm_host, 7183, 'admin', 'admin', protocol='https')
         print("CDH Version: {0}".format(cm_metrics.cluster_ver))
+        cm_metrics.get_secure_type()
         pretty_print(cm_metrics.get_cm_active_namenode())
         pretty_print(cm_metrics.get_cm_hive_metastore())
         pretty_print(cm_metrics.get_cm_hiveserver2())
