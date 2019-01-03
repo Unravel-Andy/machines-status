@@ -1,5 +1,5 @@
 #v1.1.9
-import re
+import os
 import subprocess
 try:
     import requests
@@ -16,7 +16,6 @@ except:
     subprocess.call(['sudo', 'pip', 'install', 'BeautifulSoup4'])
     from bs4 import BeautifulSoup
 import re
-import configs_collector
 
 class Confluence(object):
     """docstring for Confluence."""
@@ -25,7 +24,7 @@ class Confluence(object):
         self.al_base = atlassian_base_url
         self.get_content_body_url = self.al_base + '?expand=body.storage'
         self.credentials = credentials
-        self.unravel_version_url = configs_collector.get_unravel_ver()
+        self.unravel_version = self.unravel_ver()
         self.headers = {'Authorization': 'Basic %s' % credentials}
         self.body = None
         self.content_ver = None
@@ -138,17 +137,15 @@ class Confluence(object):
 
     # Get Unravel Version Number From version.txt
     def unravel_ver(self):
-        try:
-            res = requests.get(self.unravel_version_url)
-
-            if res.status_code == 200:
-                unravel_version = re.search('[0-9]{1,2}.[0-9]{1,2}.[0-9]{,2}.[0-9a-zA-Z]{,6}', res.text)
-                self.unravel_version = str(unravel_version.group(0))
-                return self.unravel_version
-            else:
-                print('Unknowm Unravel Version')
-                self.unravel_version = '4.0.0.0'
-                return self.unravel_version
-        except:
-            self.unravel_version = '4.0.0.0'
-            return self.unravel_version
+        """
+        :return: installed unravel version number
+        """
+        unravel_version_path = "/usr/local/unravel/ngui/www/version.txt"
+        unravel_ver = "UNKNOWN"
+        if os.path.exists(unravel_version_path):
+            with open(unravel_version_path, 'r') as f:
+                version_file = f.read()
+                f.close()
+            if re.search('4\.[0-9]\.[0-9].*', version_file):
+                return re.search('4\.[0-9]\.[0-9].*', version_file).group(0)
+        return unravel_ver
