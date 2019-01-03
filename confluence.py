@@ -116,7 +116,7 @@ class Confluence(object):
                 print('Now Looking for alias name instead\n')
                 try:
                     if self.al_base == 'https://unraveldata.atlassian.net/wiki/rest/api/content/502628605':
-                        tag = soup.find_all(text=re.compile(self.alias_name+'.*'))[-1].find_next('span').find(text=re.compile('4.[0-9].[0-9].[0-9](.[0-9]b[0-9]{1,4})?')).find_parent()
+                        tag = soup.find_all(text=re.compile(self.alias_name+'.*'))[-1].find_next('span').find(text=re.compile('4.[0-9].[0-9].[0-9](.[0-9]b[0-9]{1,4})?|UNKNOWN')).find_parent()
                         print(str(tag))
                     else:
                         tag = soup.find(text=self.alias_name).find_parent('td').find_next('td').find_next('td').find_next('td').find_next('td')
