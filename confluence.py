@@ -1,4 +1,4 @@
-#v1.1.8
+#v1.1.9
 import re
 import subprocess
 try:
@@ -16,6 +16,7 @@ except:
     subprocess.call(['sudo', 'pip', 'install', 'BeautifulSoup4'])
     from bs4 import BeautifulSoup
 import re
+import configs_collector
 
 class Confluence(object):
     """docstring for Confluence."""
@@ -24,7 +25,7 @@ class Confluence(object):
         self.al_base = atlassian_base_url
         self.get_content_body_url = self.al_base + '?expand=body.storage'
         self.credentials = credentials
-        self.unravel_version_url = self.unravel_base + '/version.txt'
+        self.unravel_version_url = configs_collector.get_unravel_ver()
         self.headers = {'Authorization': 'Basic %s' % credentials}
         self.body = None
         self.content_ver = None
