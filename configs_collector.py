@@ -26,6 +26,15 @@ def get_cluster_type():
 
 class CMMetrics:
     def __init__(self, host, port, username, password, api_ver=11, protocol='http'):
+        """
+
+        :param host: Cloudera Manager host
+        :param port: Cloudera Manager port
+        :param username: Cloudera Manager username
+        :param password: Cloudera Manager password
+        :param api_ver: Cloudera Manager api version
+        :param protocol: Cloudera Manager protocol http or https
+        """
         self.host = host
         self.port = port
         self.api_ver = api_ver
@@ -182,6 +191,14 @@ class CMMetrics:
 
 class AMMetrics:
     def __init__(self, host, port, username, password, api_ver=1, protocol='http'):
+        """
+        :param host: ambari server host
+        :param port: ambari server port
+        :param username: ambari server username
+        :param password: ambari server password
+        :param api_ver: ambari server api version default 1
+        :param protocol: ambari server protocol http or https
+        """
         self.host = host
         self.port = port
         self.api_ver = api_ver
