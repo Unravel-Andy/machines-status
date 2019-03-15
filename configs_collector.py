@@ -292,11 +292,14 @@ class AMMetrics:
         req = self.get_host_components('KAFKA_BROKER')
         for item in req['items']:
             am_kafka['broker_hosts'].append(item['HostRoles']['host_name'])
-        am_kafka['broker_port'] = self.get_configs('kafka-broker')['items'][0]['properties'].get('port', 9092)
-        kafka_env = self.get_configs('kafka-env')['items'][0]['properties']['content']
-        search_jmx = re.search("JMX_PORT=(.*)", kafka_env)
-        if search_jmx:
-            am_kafka['broker_jmx_port'] = search_jmx.group(1)
+        try:
+            am_kafka['broker_port'] = self.get_configs('kafka-broker')['items'][0]['properties'].get('port', 9092)
+            kafka_env = self.get_configs('kafka-env')['items'][0]['properties']['content']
+            search_jmx = re.search("JMX_PORT=(.*)", kafka_env)
+            if search_jmx:
+                am_kafka['broker_jmx_port'] = search_jmx.group(1)
+        except KeyError:
+            print("No kafka broker found")
         return am_kafka
 
     def get_host_components(self, component_name):
@@ -318,9 +321,13 @@ class AMMetrics:
             return secure_type
 
     def get_configs(self, conf_type):
-        conf_tag = self.cur_config_tag[conf_type]['tag']
-        req = self._get_req("{0}?{1}".format(self.configs_base_url, 'type={0}&tag={1}'.format(conf_type, conf_tag)))
-        return req.json()
+        try:
+            conf_tag = self.cur_config_tag[conf_type]['tag']
+            req = self._get_req("{0}?{1}".format(self.configs_base_url, 'type={0}&tag={1}'.format(conf_type, conf_tag)))
+            return req.json()
+        except KeyError:
+            print("conf_type not found: %s" % conf_type)
+            return dict()
 
 
 class MAPRMetrics():
