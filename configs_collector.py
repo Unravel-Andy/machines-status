@@ -25,9 +25,9 @@ def get_cluster_type():
 
 
 class CMMetrics:
+    """Get CM configs via API"""
     def __init__(self, host, port, username, password, api_ver=11, protocol='http'):
         """
-
         :param host: Cloudera Manager host
         :param port: Cloudera Manager port
         :param username: Cloudera Manager username
@@ -88,7 +88,7 @@ class CMMetrics:
         return cm_active_namenode
 
     def get_cm_hive_metastore(self):
-        cm_hive_metastore = {'metastore_hosts': []}
+        cm_hive_metastore = {'metastore_hosts': [], 'metastore_port': 9083}
         req = self.get_service_roles('hive')
         if req:
             for item in req:
@@ -97,6 +97,8 @@ class CMMetrics:
                     for config in self.get_role_config('hive', item['name']):
                         if config['name'] == "hiveserver2_webui_port":
                             cm_hive_metastore['hs2_webui_port'] = config.get("value", 10002)
+                        if config['name'] == "hive_metastore_port":
+                            cm_hive_metastore['metastore_port'] = config.get("value", config.get("default", 9083))
         return cm_hive_metastore
 
     def get_impala_daemon(self):
@@ -110,6 +112,14 @@ class CMMetrics:
                         if config['name'] == "beeswax_port":
                             cm_impala_daemon['beeswax_port'] = config.get("value", 21000)
         return cm_impala_daemon
+
+    def get_cm_hdfs_configs(self):
+        cm_hdfs = {'dfs_namenode_acls_enabled': 'false'}
+        req = self.get_base_config('hdfs')
+        for item in req:
+            if item['name'] == "dfs_namenode_acls_enabled":
+                cm_hdfs['dfs_namenode_acls_enabled'] = item.get('value', item.get('default', 'false'))
+        return cm_hdfs
 
     def get_cm_hiveserver2(self):
         cm_hiveserver2 = {'hive_server2_hosts': []}
@@ -161,6 +171,12 @@ class CMMetrics:
                             cm_zookeeper['zk_client_port'] = config.get('value', 2181)
         return cm_zookeeper
 
+    def get_base_config(self, service_name):
+        req = self._get_req("{}/{}/config?view=full".format(self.services_api_url, service_name))
+        if req.status_code != 200:
+            print("get role config request return: " + str(req.status_code))
+        return req.json()['items']
+
     def get_role_config(self, service_name, role_name):
         req = self._get_req("{}/{}/roles/{}/config?view=full".format(self.services_api_url, service_name, role_name))
         if req.status_code != 200:
@@ -190,6 +206,7 @@ class CMMetrics:
 
 
 class AMMetrics:
+    """Get AM configs via API"""
     def __init__(self, host, port, username, password, api_ver=1, protocol='http'):
         """
         :param host: ambari server host
@@ -292,14 +309,11 @@ class AMMetrics:
         req = self.get_host_components('KAFKA_BROKER')
         for item in req['items']:
             am_kafka['broker_hosts'].append(item['HostRoles']['host_name'])
-        try:
-            am_kafka['broker_port'] = self.get_configs('kafka-broker')['items'][0]['properties'].get('port', 9092)
-            kafka_env = self.get_configs('kafka-env')['items'][0]['properties']['content']
-            search_jmx = re.search("JMX_PORT=(.*)", kafka_env)
-            if search_jmx:
-                am_kafka['broker_jmx_port'] = search_jmx.group(1)
-        except KeyError:
-            print("No kafka broker found")
+        am_kafka['broker_port'] = self.get_configs('kafka-broker')['items'][0]['properties'].get('port', 9092)
+        kafka_env = self.get_configs('kafka-env')['items'][0]['properties']['content']
+        search_jmx = re.search("JMX_PORT=(.*)", kafka_env)
+        if search_jmx:
+            am_kafka['broker_jmx_port'] = search_jmx.group(1)
         return am_kafka
 
     def get_host_components(self, component_name):
@@ -321,13 +335,9 @@ class AMMetrics:
             return secure_type
 
     def get_configs(self, conf_type):
-        try:
-            conf_tag = self.cur_config_tag[conf_type]['tag']
-            req = self._get_req("{0}?{1}".format(self.configs_base_url, 'type={0}&tag={1}'.format(conf_type, conf_tag)))
-            return req.json()
-        except KeyError:
-            print("conf_type not found: %s" % conf_type)
-            return dict()
+        conf_tag = self.cur_config_tag[conf_type]['tag']
+        req = self._get_req("{0}?{1}".format(self.configs_base_url, 'type={0}&tag={1}'.format(conf_type, conf_tag)))
+        return req.json()
 
 
 class MAPRMetrics():
@@ -434,6 +444,7 @@ if __name__ == '__main__':
         pretty_print(cm_metrics.get_cm_oozie_server())
         pretty_print(cm_metrics.get_impala_daemon())
         pretty_print(cm_metrics.get_cm_kafka_brokers())
+        pretty_print(cm_metrics.get_cm_hdfs_configs())
     elif cluster_type == "HDP":
         am_host = get_server()
         try:
