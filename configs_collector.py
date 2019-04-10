@@ -265,12 +265,18 @@ class AMMetrics:
         return am_active_namenode
 
     def get_am_ats(self):
-        am_ats = {}
+        am_ats = dict()
         am_ats['ats_web_address'] = self.get_configs('yarn-site')['items'][0]['properties'].get(
             'yarn.timeline-service.webapp.address', '')
         am_ats['ats_web_https_address'] = self.get_configs('yarn-site')['items'][0]['properties'].get(
             'yarn.timeline-service.webapp.https.address', '')
         return am_ats
+
+    def get_am_hdfs_configs(self):
+        am_hdfs = dict()
+        am_hdfs['dfs_namenode_acls_enabled'] = self.get_configs('hdfs-site')['items'][0]['properties'].get(
+            'dfs.namenode.acls.enabled', 'false')
+        return am_hdfs
 
     def get_am_hive_metastore(self):
         am_hive_metastore = {'metastore_hosts': []}
@@ -402,11 +408,11 @@ def get_server():
     if cluster_type == "CDH":
         cloudera_agent_conf_path = '/etc/cloudera-scm-agent/config.ini'
         with open(cloudera_agent_conf_path, "r") as f:
-            server_host = re.search('server_host=.*', f.read()).group(0).split('=')[1]
+            server_host = re.search('server_host\s?=.*', f.read()).group(0).split('=')[1].strip()
     elif cluster_type == "HDP":
         ambari_agent_conf_path = '/etc/ambari-agent/conf/ambari-agent.ini'
         with open(ambari_agent_conf_path, "r") as f:
-            server_host = re.search('hostname=.*', f.read()).group(0).split('=')[1]
+            server_host = re.search('hostname\s?=.*', f.read()).group(0).split('=')[1].strip()
     elif cluster_type == "MAPR":
         pass
     return server_host
@@ -459,6 +465,7 @@ if __name__ == '__main__':
         pretty_print(am_metrics.get_am_oozie_server())
         pretty_print(am_metrics.get_am_kafka_broker())
         pretty_print(am_metrics.get_am_ats())
+        pretty_print(am_metrics.get_am_hdfs_configs())
     elif cluster_type == "MAPR":
         mapr_metrics = MAPRMetrics()
         print("MAPR Version: ".format(MAPRMetrics.get_mapr_version()))

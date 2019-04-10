@@ -1,9 +1,10 @@
 import re
 import subprocess
 import datetime
+import platform
+from subprocess import Popen, PIPE
 import configs_collector as CC
 import mongodb_connector
-from subprocess import Popen, PIPE
 
 
 def get_host():
@@ -50,7 +51,6 @@ def send_to_db(alias_name=None):
                     "update_time": cur_time,
                     "unravel_db_type": CC.get_unravel_db_type(),
                     "security type": cm_metrics.get_secure_type()}
-        db_connector.update(query, new_data)
     elif CC.cluster_type == "HDP":
         am_host = CC.get_server()
         try:
@@ -72,7 +72,6 @@ def send_to_db(alias_name=None):
                     "update_time": cur_time,
                     "unravel_db_type": CC.get_unravel_db_type(),
                     "security type": am_metrics.get_secure_type()}
-        db_connector.update(query, new_data)
     elif CC.cluster_type == "MAPR":
         mapr_metrics = CC.MAPRMetrics()
         query = {"hostname": host_name}
@@ -82,4 +81,8 @@ def send_to_db(alias_name=None):
                     "unravel_version": CC.get_unravel_ver(),
                     "update_time": cur_time,
                     "unravel_db_type": CC.get_unravel_db_type()}
-        db_connector.update(query, new_data)
+    else:
+        print("Cluster type {0} not supported".format(CC.cluster_type))
+        exit(0)
+    new_data = {"os": " ".join(platform.linux_distribution())}
+    db_connector.update(query, new_data)
