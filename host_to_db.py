@@ -31,7 +31,7 @@ def send_to_db(alias_name=None):
     db_connector = mongodb_connector.DBConnector(db_host="172.66.1.211")
     cur_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     if CC.cluster_type == "CDH":
-        cm_host = CC.get_server()
+        cm_host = CC.get_server("CDH")
         try:
             cm_metrics = CC.CMMetrics(cm_host, 7180, 'admin', 'admin')
         except:
@@ -52,7 +52,7 @@ def send_to_db(alias_name=None):
                     "unravel_db_type": CC.get_unravel_db_type(),
                     "security type": cm_metrics.get_secure_type()}
     elif CC.cluster_type == "HDP":
-        am_host = CC.get_server()
+        am_host = CC.get_server("HDP")
         try:
             am_metrics = CC.AMMetrics(am_host, 8080, 'admin', 'admin')
         except:
