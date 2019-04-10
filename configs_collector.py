@@ -403,7 +403,7 @@ def get_unravel_db_type():
     else:
         return "{0} {1}".format(db_type, db_ver)
 
-def get_server():
+def get_server(cluster_type):
     server_host = None
     if cluster_type == "CDH":
         cloudera_agent_conf_path = '/etc/cloudera-scm-agent/config.ini'
@@ -437,7 +437,7 @@ cluster_type = get_cluster_type()
 if __name__ == '__main__':
     db_type = get_unravel_db_type()
     if cluster_type == "CDH":
-        cm_host = get_server()
+        cm_host = get_server("CDH")
         try:
             cm_metrics = CMMetrics(cm_host, 7180, 'admin', 'admin')
         except:
@@ -452,7 +452,7 @@ if __name__ == '__main__':
         pretty_print(cm_metrics.get_cm_kafka_brokers())
         pretty_print(cm_metrics.get_cm_hdfs_configs())
     elif cluster_type == "HDP":
-        am_host = get_server()
+        am_host = get_server("HDP")
         try:
             am_metrics = AMMetrics(am_host, 8080, 'admin', 'admin')
         except:
