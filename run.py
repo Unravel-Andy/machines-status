@@ -1,9 +1,10 @@
 #v1.1.9
-from confluence import Confluence
 from base64 import b64encode as b64e
 import subprocess
 import argparse
 import os
+import logging
+from confluence import Confluence
 import host_to_db
 
 parser = argparse.ArgumentParser()
@@ -14,6 +15,7 @@ argv = parser.parse_args()
 
 
 def auto_update():
+    """ git pull before the script run"""
     print('Updating Script\n')
     os.chdir('/usr/bin/machines-status/')
     path = '--git-dir=/usr/bin/machines-status/.git'
@@ -40,8 +42,8 @@ def update_confluence(atlassian_base_url):
     print('Editing Content Status: %s' % body['stat'])
     print('Editing Content type: %s\n' % body['type'])
 
-    # Check whether live machine status page need update or not
-    if confluence.set_content() == True:
+    # Check whether Test Cluster page need update or not
+    if confluence.set_content():
         print('should process and put content in %s' % body['title'])
         result = confluence.put_content()
         if result:
@@ -54,11 +56,21 @@ def update_confluence(atlassian_base_url):
 
 def main():
     auto_update()
-    update_confluence(atlassian_base_url='https://unraveldata.atlassian.net/wiki/rest/api/content/284262500')
     update_confluence(atlassian_base_url='https://unraveldata.atlassian.net/wiki/rest/api/content/502628605')
     print("Sending configs to Database")
     host_to_db.send_to_db(alias_name=argv.alias)
 
 
 if __name__ == '__main__':
+    LOGGER = logging.getLogger('machines-status')
+    LOGGER.setLevel(logging.DEBUG)
+    LOGFORMAT = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s : %(message)s')
+    LOGFILE = '/tmp/machines_status_update.log'
+    fileHandler = logging.FileHandler(LOGFILE)
+    fileHandler.setFormatter(LOGFORMAT)
+    steam_handler = logging.StreamHandler()
+    steam_handler.setLevel(logging.DEBUG)
+    steam_handler.setFormatter(LOGFORMAT)
+    LOGGER.addHandler(fileHandler)
+    LOGGER.addHandler(steam_handler)
     main()

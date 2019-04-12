@@ -17,8 +17,9 @@ except:
     from bs4 import BeautifulSoup
 import re
 
+
 class Confluence(object):
-    """docstring for Confluence."""
+    """docstring for updating Confluence Wiki Page"""
     def __init__(self, unravel_base_url, atlassian_base_url, credentials, alias_name=None):
         self.unravel_base = unravel_base_url
         self.al_base = atlassian_base_url
@@ -36,8 +37,12 @@ class Confluence(object):
         self.server_name = None
         self.ip_addr = None
 
-    # Get Main Body Content from Confluence
     def get_content_body(self):
+        """
+        Get Main Body Content from Confluence API
+        :return: wiki page: title, type, stat, hosts
+        :rtype: dict
+        """
         res = requests.get(self.get_content_body_url, headers=self.headers)
         content = json.loads(res.text)
 
@@ -49,19 +54,27 @@ class Confluence(object):
 
         return {'title': self.content_title, 'type': self.content_type, 'stat': self.content_stat, 'hosts': hosts}
 
-    # Get Confluence's Content Current Version Number
     def get_content_ver(self):
+        """
+        Get Confluence's Content Current Version Number
+        :return: Current Confluence Page Version Number
+        :rtype: int
+        """
         al_ver_req = requests.get(self.al_base, headers=self.headers)
 
         self.content_ver = str(json.loads(al_ver_req.text)['version']['number']+1)
 
         return self.content_ver
 
-    # Get Current Hostname and ip address
     def get_host(self):
-            self.server_name = subprocess.check_output(['hostname', '-s']).split('\n')[0]
-            self.ip_addr = subprocess.check_output(['hostname', '-i']).split('\n')[0]
-            return(self.server_name, self.ip_addr)
+        """
+        Get Current Hostname and ip address
+        :return: server_name, server ip address
+        :rtype: str
+        """
+        self.server_name = subprocess.check_output(['hostname', '-s']).split('\n')[0]
+        self.ip_addr = subprocess.check_output(['hostname', '-i']).split('\n')[0]
+        return self.server_name, self.ip_addr
 
     # Save content back to Confluence
     def put_content(self):
@@ -89,42 +102,32 @@ class Confluence(object):
         else:
             return res.status_code
 
-    # Set New Content that will send back to Confluence
     def set_content(self):
-        should_process = False
+        """ Set New Content that will send back to Confluence """
+        should_process = False  # whether wiki page need to be updated
         soup = BeautifulSoup(self.body, "html.parser")
 
         try:
-            if self.al_base == 'https://unraveldata.atlassian.net/wiki/rest/api/content/502628605':  # Test Cluster Wiki Page
-                tag = soup.find(text=self.server_name).find_next('span').find(text=re.compile('4.[0-9].[0-9].[0-9](.[0-9]b[0-9]{1,4})?|UNKNOWN')).find_parent()
-                print(str(tag))
-            else:
-                tag = soup.find(text=self.server_name).find_parent('td').find_next('td').find_next('td').find_next('td').find_next('td')
-                print(str(tag))
+            # Test Cluster Wiki Page
+            tag = soup.find(text=self.server_name).find_next('span').find(text=re.compile('4.[0-9].[0-9].[0-9](.[0-9]b[0-9]{1,4})?|UNKNOWN')).find_parent()
+            print(str(tag))
         except Exception as e:
             print('No server name Found')
             print('Now Looking for IP address instead\n')
             try:
-                if self.al_base == 'https://unraveldata.atlassian.net/wiki/rest/api/content/502628605':
-                    tag = soup.find(text=self.ip_addr).find_next('span').find(text=re.compile('4.[0-9].[0-9].[0-9](.[0-9]b[0-9]{1,4})?')).find_parent()
-                    print(str(tag))
-                else:
-                    tag = soup.find(text=self.ip_addr).find_parent('td').find_previous('td')
-                    print(str(tag))
+                tag = soup.find(text=self.ip_addr).find_next('span').find(text=re.compile('4.[0-9].[0-9].[0-9](.[0-9]b[0-9]{1,4})?')).find_parent()
+                print(str(tag))
             except:
                 print('No IP address Found')
                 print('Now Looking for alias name instead\n')
                 try:
-                    if self.al_base == 'https://unraveldata.atlassian.net/wiki/rest/api/content/502628605':
-                        tag = soup.find_all(text=re.compile(self.alias_name+'.*'))[-1].find_next('span').find(text=re.compile('4.[0-9].[0-9].[0-9](.[0-9]b[0-9]{1,4})?|UNKNOWN')).find_parent()
-                        print(str(tag))
-                    else:
-                        tag = soup.find(text=self.alias_name).find_parent('td').find_next('td').find_next('td').find_next('td').find_next('td')
-                        print(str(tag))
+                    tag = soup.find_all(text=re.compile(self.alias_name+'.*'))[-1].find_next('span').find(text=re.compile('4.[0-9].[0-9].[0-9](.[0-9]b[0-9]{1,4})?|UNKNOWN')).find_parent()
+                    print(str(tag))
                 except:
                     print('No alias name Found')
                     return should_process
 
+        # compare unravel version in wiki page with local
         if tag.string and tag.string != self.unravel_version:
             tag.string = self.unravel_version
             should_process = True
@@ -132,12 +135,14 @@ class Confluence(object):
             tag.string = self.unravel_version
             should_process = True
 
+        # Create new wiki page content for update
         self.new_content = str(soup)
         return should_process
 
-    # Get Unravel Version Number From version.txt
-    def unravel_ver(self):
+    @staticmethod
+    def unravel_ver():
         """
+        Get Unravel Version Number From version.txt
         :return: installed unravel version number
         """
         unravel_version_path = "/usr/local/unravel/ngui/www/version.txt"
