@@ -84,5 +84,5 @@ def send_to_db(alias_name=None):
     else:
         print("Cluster type {0} not supported".format(CC.cluster_type))
         exit(0)
-    new_data = {"os": " ".join(platform.linux_distribution())}
+    new_data["os"] = " ".join(platform.linux_distribution())
     db_connector.update(query, new_data)
