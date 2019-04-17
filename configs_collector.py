@@ -184,7 +184,7 @@ class CMMetrics:
         return req.json()['items']
 
     def get_secure_type(self):
-        secure_type = "UNKNOWN"
+        secure_type = "None"
         try:
             req = self._get_req("{0}/cm/kerberosPrincipals".format(self.api_url))
             if len(req.json()["items"]) > 0:
@@ -331,7 +331,7 @@ class AMMetrics:
         return req.json()
 
     def get_secure_type(self):
-        secure_type = "UNKNOWN"
+        secure_type = "None"
         try:
             req = self._get_req("{0}/clusters?fields=Clusters/security_type".format(self.api_url))
             secure_type = req.json()["items"][0]["Clusters"]["security_type"]
