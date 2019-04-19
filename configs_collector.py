@@ -87,6 +87,16 @@ class CMMetrics:
                     break
         return cm_active_namenode
 
+    def get_cm_active_rm(self):
+        cm_active_rm = {}
+        req = self.get_service_roles('yarn')
+        if req:
+            for item in req:
+                if item['type'] == 'RESOURCEMANAGER' and item['haStatus'] == 'ACTIVE':
+                    cm_active_rm['active_resourcemanager'] = self.host_dict[item['hostRef']['hostId']]
+                    break
+        return cm_active_rm
+
     def get_cm_hive_metastore(self):
         cm_hive_metastore = {'metastore_hosts': [], 'metastore_port': 9083}
         req = self.get_service_roles('hive')
@@ -444,6 +454,7 @@ if __name__ == '__main__':
             cm_metrics = CMMetrics(cm_host, 7183, 'admin', 'admin', protocol='https')
         print("CDH Version: {0}".format(cm_metrics.cluster_ver))
         pretty_print(cm_metrics.get_cm_active_namenode())
+        pretty_print(cm_metrics.get_cm_active_rm())
         pretty_print(cm_metrics.get_cm_hive_metastore())
         pretty_print(cm_metrics.get_cm_hiveserver2())
         pretty_print(cm_metrics.get_cm_zookeeper())
@@ -451,6 +462,7 @@ if __name__ == '__main__':
         pretty_print(cm_metrics.get_impala_daemon())
         pretty_print(cm_metrics.get_cm_kafka_brokers())
         pretty_print(cm_metrics.get_cm_hdfs_configs())
+        print("Kerberos: " + cm_metrics.get_secure_type())
     elif cluster_type == "HDP":
         am_host = get_server("HDP")
         try:
@@ -466,6 +478,7 @@ if __name__ == '__main__':
         pretty_print(am_metrics.get_am_kafka_broker())
         pretty_print(am_metrics.get_am_ats())
         pretty_print(am_metrics.get_am_hdfs_configs())
+        print("Kerberos: " + am_metrics.get_secure_type())
     elif cluster_type == "MAPR":
         mapr_metrics = MAPRMetrics()
         print("MAPR Version: ".format(MAPRMetrics.get_mapr_version()))
