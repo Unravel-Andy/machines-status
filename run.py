@@ -56,7 +56,10 @@ def update_confluence(atlassian_base_url):
 
 def main():
     auto_update()
-    update_confluence(atlassian_base_url='https://unraveldata.atlassian.net/wiki/rest/api/content/502628605')
+    try:
+        update_confluence(atlassian_base_url='https://unraveldata.atlassian.net/wiki/rest/api/content/502628605')
+    except:
+        pass
     print("Sending configs to Database")
     host_to_db.send_to_db(alias_name=argv.alias)
 

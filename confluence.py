@@ -54,6 +54,7 @@ class Confluence(object):
 
         return {'title': self.content_title, 'type': self.content_type, 'stat': self.content_stat, 'hosts': hosts}
 
+    @property
     def get_content_ver(self):
         """
         Get Confluence's Content Current Version Number
@@ -61,7 +62,9 @@ class Confluence(object):
         :rtype: int
         """
         al_ver_req = requests.get(self.al_base, headers=self.headers)
-
+        if al_ver_req.status_code != 200:
+            print(al_ver_req.content)
+            exit(1)
         self.content_ver = str(json.loads(al_ver_req.text)['version']['number']+1)
 
         return self.content_ver
