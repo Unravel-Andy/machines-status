@@ -326,7 +326,6 @@ class AMMetrics:
         am_zk['zk_client_port'] = self.get_configs('zoo.cfg')['items'][0]['properties'].get('clientPort', 2181)
         return am_zk
 
-    @property
     def get_am_kafka_broker(self):
         am_kafka = {'broker_hosts': []}
         try:
