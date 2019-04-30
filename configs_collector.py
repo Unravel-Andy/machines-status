@@ -1,6 +1,8 @@
 #!/usr/bin/python
 """
 Script to get configurations from CM/AM
+-- 04/29/19
+    Add support for HDP 2.3
 """
 import re
 import os
@@ -280,6 +282,10 @@ class AMMetrics:
             'yarn.timeline-service.webapp.address', '')
         am_ats['ats_web_https_address'] = self.get_configs('yarn-site')['items'][0]['properties'].get(
             'yarn.timeline-service.webapp.https.address', '')
+        # Get ATS V2 reader web address if HDP 3.0 or above
+        if compare_versions(self.cluster_ver, "3.0.0.0") >= 0:
+            am_ats['atsV2_reader_http_address'] = self.get_configs('yarn-site')['items'][0]['properties'].get('yarn.timeline-service.reader.webapp.address', '')
+            am_ats['atsV2_reader_https_address'] = self.get_configs('yarn-site')['items'][0]['properties'].get('yarn.timeline-service.reader.webapp.https.address', '')
         return am_ats
 
     def get_am_hdfs_configs(self):
@@ -320,16 +326,21 @@ class AMMetrics:
         am_zk['zk_client_port'] = self.get_configs('zoo.cfg')['items'][0]['properties'].get('clientPort', 2181)
         return am_zk
 
+    @property
     def get_am_kafka_broker(self):
         am_kafka = {'broker_hosts': []}
-        req = self.get_host_components('KAFKA_BROKER')
-        for item in req['items']:
-            am_kafka['broker_hosts'].append(item['HostRoles']['host_name'])
-        am_kafka['broker_port'] = self.get_configs('kafka-broker')['items'][0]['properties'].get('port', 9092)
-        kafka_env = self.get_configs('kafka-env')['items'][0]['properties']['content']
-        search_jmx = re.search("JMX_PORT=(.*)", kafka_env)
-        if search_jmx:
-            am_kafka['broker_jmx_port'] = search_jmx.group(1)
+        try:
+            req = self.get_host_components('KAFKA_BROKER')
+            for item in req['items']:
+                am_kafka['broker_hosts'].append(item['HostRoles']['host_name'])
+            am_kafka['broker_port'] = self.get_configs('kafka-broker')['items'][0]['properties'].get('port', 9092)
+            kafka_env = self.get_configs('kafka-env')['items'][0]['properties']['content']
+            search_jmx = re.search("JMX_PORT=(.*)", kafka_env)
+            if search_jmx:
+                am_kafka['broker_jmx_port'] = search_jmx.group(1)
+        except Exception as e:
+            print(e)
+            print("Error: Kafka Configs Not Found")
         return am_kafka
 
     def get_host_components(self, component_name):
@@ -351,8 +362,13 @@ class AMMetrics:
             return secure_type
 
     def get_configs(self, conf_type):
-        conf_tag = self.cur_config_tag[conf_type]['tag']
-        req = self._get_req("{0}?{1}".format(self.configs_base_url, 'type={0}&tag={1}'.format(conf_type, conf_tag)))
+        if compare_versions(self.cluster_ver, "2.6.0.0") < 0:
+            tags = self._get_req("{0}?{1}".format(self.configs_base_url, 'type={0}'.format(conf_type))).json()['items']
+            conf_tag = sorted(tags, key=lambda i: i['version'])[-1]['tag']
+            req = self._get_req("{0}?{1}".format(self.configs_base_url, 'type={0}&tag={1}'.format(conf_type, conf_tag)))
+        else:
+            conf_tag = self.cur_config_tag[conf_type]['tag']
+            req = self._get_req("{0}?{1}".format(self.configs_base_url, 'type={0}&tag={1}'.format(conf_type, conf_tag)))
         return req.json()
 
 
@@ -442,6 +458,30 @@ def get_unravel_ver():
     return unravel_ver
 
 
+def compare_versions(version1, version2):
+        """
+        :param version1: string of version number
+        :type version1: str
+        :param version2: string of version number
+        :type version2: str
+        :return: int 1: v1 > v2 0: v1 == v2 -1 v1 < v2
+        """
+        result = 0
+        version1_list = version1.split('.')
+        version2_list = version2.split('.')
+        max_version = max(len(version1_list), len(version2_list))
+        for index in range(max_version):
+            v1_digit = int(version1_list[index]) if len(version1_list) > index else 0
+            v2_digit = int(version2_list[index]) if len(version2_list) > index else 0
+            if v1_digit > v2_digit:
+                return 1
+            elif v1_digit < v2_digit:
+                return -1
+            elif version1_list == version2_list:
+                pass
+        return result
+
+
 cluster_type = get_cluster_type()
 
 if __name__ == '__main__':
@@ -475,7 +515,7 @@ if __name__ == '__main__':
         pretty_print(am_metrics.get_am_hiveserver2())
         pretty_print(am_metrics.get_am_zookeeper())
         pretty_print(am_metrics.get_am_oozie_server())
-        pretty_print(am_metrics.get_am_kafka_broker())
+        pretty_print(am_metrics.get_am_kafka_broker)
         pretty_print(am_metrics.get_am_ats())
         pretty_print(am_metrics.get_am_hdfs_configs())
         print("Kerberos: " + am_metrics.get_secure_type())
