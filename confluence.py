@@ -54,7 +54,6 @@ class Confluence(object):
 
         return {'title': self.content_title, 'type': self.content_type, 'stat': self.content_stat, 'hosts': hosts}
 
-    @property
     def get_content_ver(self):
         """
         Get Confluence's Content Current Version Number
