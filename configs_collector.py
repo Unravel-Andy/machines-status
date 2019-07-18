@@ -419,7 +419,13 @@ def get_unravel_db_type():
                     db_type = re.findall(regex, line)[0]
         if db_type == "mysql" or db_type == "mariadb":
             get_ver = Popen("echo 'select VERSION();' | /usr/local/unravel/install_bin/db_access.sh", shell=True, stdout=PIPE).communicate()
+            get_type = Popen("echo \"SHOW VARIABLES LIKE 'version_comment';\" | /usr/local/unravel/install_bin/db_access.sh | awk '{print $2}'",
+                             shell=True, stdout=PIPE).communicate()
             db_ver = get_ver[0].split("\n")[-2].split("-")[0]
+            if "mysql" in get_type[0].lower():
+                db_type = "mysql"
+            else:
+                db_type = "mariadb"
         elif db_type == "postgresql":
             get_ver = Popen("echo 'select VERSION();' | /usr/local/unravel/install_bin/db_access.sh", shell=True, stdout=PIPE).communicate()
             if re.search("PostgreSQL [0-9]+.[0-9]+", get_ver[0]):
@@ -514,7 +520,7 @@ if __name__ == '__main__':
         pretty_print(am_metrics.get_am_hiveserver2())
         pretty_print(am_metrics.get_am_zookeeper())
         pretty_print(am_metrics.get_am_oozie_server())
-        pretty_print(am_metrics.get_am_kafka_broker)
+        pretty_print(am_metrics.get_am_kafka_broker())
         pretty_print(am_metrics.get_am_ats())
         pretty_print(am_metrics.get_am_hdfs_configs())
         print("Kerberos: " + am_metrics.get_secure_type())
